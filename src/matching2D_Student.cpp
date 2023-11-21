@@ -62,7 +62,7 @@ void descKeypoints(vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descr
 }
 
 // Detect keypoints in image using the traditional Shi-Thomasi detector
-void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool bVis)
+void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img)
 {
     // compute detector parameters based on image size
     int blockSize = 4;       //  size of an average block for computing a derivative covariation matrix over each pixel neighborhood
@@ -89,15 +89,107 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
     }
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
     cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsHarris(vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    // Detector parameters
+    int blockSize = 2;     // for every pixel, a blockSize × blockSize neighborhood is considered
+    int apertureSize = 3;  // aperture parameter for Sobel operator (must be odd)
+    int minResponse = 100; // minimum value for a corner in the 8bit scaled response matrix
+    double k = 0.04;       // Harris parameter (see equation for details)
+
+    // Detect Harris corners and normalize output
+    cv::Mat dst, dst_norm, dst_norm_scaled;
+    dst = cv::Mat::zeros(img.size(), CV_32FC1);
+    cv::cornerHarris(img, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT);
+    cv::normalize(dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat());
+    cv::convertScaleAbs(dst_norm, dst_norm_scaled);
+
+    double t = (double)cv::getTickCount();
+    double max_overlap = 0.0;
+    // getting local maxima
+    // parse through the image rows
+    for(size_t i = 0; i < dst_norm.rows; i++){
+        // parse through the image coloumns
+        for(size_t j = 0; j < dst_norm.cols; j++){
+            // get one pixel
+            int response = (int)dst_norm.at<float>(i,j);
+            if(response > minResponse){
+                cv::KeyPoint new_keypoint;
+                new_keypoint.pt = cv::Point2f(j,i);
+                new_keypoint.size = apertureSize * 2;
+                new_keypoint.response = response;
+
+                // NMS
+                bool overlap_flag = false;
+                for(auto it = keypoints.begin(); it != keypoints.end(); ++it){
+                    double overlap = cv::KeyPoint::overlap(new_keypoint, *it);
+                    if(overlap > max_overlap){
+                        overlap_flag = true;
+                        if(new_keypoint.response > (*it).response){
+                            *it = new_keypoint;
+                            break;
+                        }
+                    }
+                }
+                if(!overlap_flag){
+                    keypoints.push_back(new_keypoint);
+                }
+            }
+        }
+    }
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "HARRIS detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsFast(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
+    cv::Ptr<cv::FeatureDetector> detector = cv::FastFeatureDetector::create(35,true, type);
+
+    double t = (double)cv::getTickCount();
+    detector->detect(img,keypoints);
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "FAST with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis)
+{
+    string window = "";
+
+    switch (detectorType)
+    {
+    case SHITOMASI:
+        detKeypointsShiTomasi(keypoints, img);
+        window = "SHITOMASI";
+        break;
+
+    case HARRIS:
+        detKeypointsHarris(keypoints, img);
+        window = "HARRIS";
+        break;
+
+    case FAST:
+        detKeypointsFast(keypoints,img);
+        window = "FAST";
+        break;
+
+    default:
+        break;
+    }
 
     // visualize results
     if (bVis)
     {
         cv::Mat visImage = img.clone();
         cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-        string windowName = "Shi-Tomasi Corner Detector Results";
+        string windowName = window + " Corner Detector Results";
         cv::namedWindow(windowName, 6);
         imshow(windowName, visImage);
         cv::waitKey(0);
     }
+
 }

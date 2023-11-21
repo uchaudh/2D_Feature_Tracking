@@ -14,5 +14,16 @@ struct DataFrame { // represents the available sensor information at the same ti
     std::vector<cv::DMatch> kptMatches; // keypoint matches between previous and current frame
 };
 
+enum DetectorType
+{
+    SHITOMASI,
+    HARRIS,
+    FAST,
+    BRISK,
+    ORB,
+    AKAZE,
+    SIFT
+};
+
 
 #endif /* dataStructures_h */

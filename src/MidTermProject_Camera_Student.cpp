@@ -55,47 +55,46 @@ int main(int argc, const char *argv[])
         cv::Mat img, imgGray;
         img = cv::imread(imgFullFilename);
         cv::cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
-
-        //// STUDENT ASSIGNMENT
-        //// TASK MP.1 -> replace the following code with ring buffer of size dataBufferSize
-
-        // push image into data frame buffer
         DataFrame frame;
         frame.cameraImg = imgGray;
-        dataBuffer.push_back(frame);
 
-        //// EOF STUDENT ASSIGNMENT
+        //// push image in a ring buffer
+        if(dataBuffer.size() > dataBufferSize){
+            dataBuffer.erase(dataBuffer.begin());
+        }
+         dataBuffer.push_back(frame);
+
         cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
 
         /* DETECT IMAGE KEYPOINTS */
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SHITOMASI";
+        DetectorType detectorType = FAST;
+        bool visualizeResults = true;
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 
-        if (detectorType.compare("SHITOMASI") == 0)
-        {
-            detKeypointsShiTomasi(keypoints, imgGray, false);
-        }
-        else
-        {
-            //...
-        }
-        //// EOF STUDENT ASSIGNMENT
+        detKeypointsModern(keypoints, imgGray, detectorType, visualizeResults);
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.3 -> only keep keypoints on the preceding vehicle
 
         // only keep keypoints on the preceding vehicle
         bool bFocusOnVehicle = true;
-        cv::Rect vehicleRect(535, 180, 180, 150);
+        cv::Rect vehicleRect(555, 180, 140, 150);
+        vector<cv::KeyPoint> precedingVehPoints;
         if (bFocusOnVehicle)
         {
-            // ...
+            for(auto keypoint : keypoints){
+                bool precedingVehPoint = vehicleRect.contains(keypoint.pt);
+                if(precedingVehPoint)
+                    precedingVehPoints.push_back(keypoint);
+            }
+
+            keypoints = precedingVehPoints;
         }
 
         //// EOF STUDENT ASSIGNMENT
@@ -106,7 +105,7 @@ int main(int argc, const char *argv[])
         {
             int maxKeypoints = 50;
 
-            if (detectorType.compare("SHITOMASI") == 0)
+            if (detectorType == SHITOMASI)
             { // there is no response info, so keep the first 50 as they are sorted in descending quality order
                 keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
             }

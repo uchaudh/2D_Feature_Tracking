@@ -156,6 +156,50 @@ void detKeypointsFast(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
     cout << "FAST with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
 }
 
+void detKeypointsBrisk(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    cv::Ptr<cv::FeatureDetector> brisk = cv::BRISK::create();
+
+    double t = (double)cv::getTickCount();
+    brisk->detect(img,keypoints);
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "BRISK with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsOrb(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    cv::Ptr<cv::FeatureDetector> orbDetector = cv::ORB::create();
+
+    double t = (double)cv::getTickCount();
+    orbDetector->detect(img,keypoints);
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "ORB with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsAkaze(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    cv::Ptr<cv::FeatureDetector> akazeDetector = cv::AKAZE::create();
+
+    double t = (double)cv::getTickCount();
+    akazeDetector->detect(img,keypoints);
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "AKAZE with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
+void detKeypointsSift(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img)
+{
+    cv::Ptr<cv::FeatureDetector> siftDetector = cv::SIFT::create();
+
+    double t = (double)cv::getTickCount();
+    siftDetector->detect(img,keypoints);
+
+    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
+    cout << "SIFT with n = " << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+}
+
 void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis)
 {
     string window = "";
@@ -177,7 +221,28 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, Dete
         window = "FAST";
         break;
 
+    case BRISK:
+        detKeypointsBrisk(keypoints,img);
+        window = "BRISK";
+        break;
+
+    case ORB:
+        detKeypointsOrb(keypoints,img);
+        window = "ORB";
+        break;
+
+    case AKAZE:
+        detKeypointsAkaze(keypoints,img);
+        window = "ORB";
+        break;
+
+    case SIFT:
+        detKeypointsSift(keypoints,img);
+        window = "SIFT";
+        break;
+
     default:
+        window = "None";
         break;
     }
 

@@ -69,18 +69,12 @@ int main(int argc, const char *argv[])
         /* DETECT IMAGE KEYPOINTS */
 
         // extract 2D keypoints from current image
-        vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        DetectorType detectorType = FAST;
+        vector<cv::KeyPoint> keypoints;     // create empty feature list for current image
+        DetectorType detectorType = BRISK;   //set the required detector type
         bool visualizeResults = true;
 
-        //// STUDENT ASSIGNMENT
-        //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
-        //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
-
+        // get keypoints from the required detector
         detKeypointsModern(keypoints, imgGray, detectorType, visualizeResults);
-
-        //// STUDENT ASSIGNMENT
-        //// TASK MP.3 -> only keep keypoints on the preceding vehicle
 
         // only keep keypoints on the preceding vehicle
         bool bFocusOnVehicle = true;
@@ -97,20 +91,15 @@ int main(int argc, const char *argv[])
             keypoints = precedingVehPoints;
         }
 
-        //// EOF STUDENT ASSIGNMENT
-
         // optional : limit number of keypoints (helpful for debugging and learning)
-        bool bLimitKpts = false;
+        bool bLimitKpts = true;
         if (bLimitKpts)
         {
             int maxKeypoints = 50;
 
-            if (detectorType == SHITOMASI)
-            { // there is no response info, so keep the first 50 as they are sorted in descending quality order
-                keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
-            }
+            keypoints.erase(keypoints.begin() + maxKeypoints, keypoints.end());
             cv::KeyPointsFilter::retainBest(keypoints, maxKeypoints);
-            cout << " NOTE: Keypoints have been limited!" << endl;
+            cout << " NOTE: Keypoints have been limited to " << keypoints.size();
         }
 
         // push keypoints and descriptor for current frame to end of data buffer

@@ -16,14 +16,22 @@ struct DataFrame { // represents the available sensor information at the same ti
 
 enum DetectorType
 {
-    SHITOMASI,
-    HARRIS,
-    FAST,
-    BRISK,
-    ORB,
-    AKAZE,
-    SIFT,
-    FREAK
+    SHITOMASI_Det,
+    HARRIS_Det,
+    FAST_Det,
+    BRISK_Det,
+    ORB_Det,
+    AKAZE_Det,
+    SIFT_Det
+};
+
+enum DescriptorType
+{
+    BRISK_Dsc,
+    ORB_Dsc,
+    FREAK_Dsc,
+    AKAZE_Dsc,
+    SIFT_Dsc
 };
 
 

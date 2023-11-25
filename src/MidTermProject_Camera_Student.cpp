@@ -39,6 +39,10 @@ int main(int argc, const char *argv[])
     int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
+    vector<float> NKeypoints {};
+    vector<double> detectorTime {};
+    vector<double> descriptorTime {};
+    vector<float> NMatches {};
 
     /* MAIN LOOP OVER ALL IMAGES */
 
@@ -70,17 +74,20 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints;     // create empty feature list for current image
-        DetectorType detectorType = BRISK_Det;   //set the required detector type
+        // DetectorType detectorType = HARRIS_Det;   //set the required detector type
         // DetectorType detectorType = SHITOMASI_Det;
-        // DetectorType detectorType = HARRIS_Det;
-        // DetectorType detectorType = ORB_Det;
         // DetectorType detectorType = FAST_Det;
+        // DetectorType detectorType = BRISK_Det;
+        // DetectorType detectorType = ORB_Det;
         // DetectorType detectorType = AKAZE_Det;
-        // DetectorType detectorType = SIFT_Det;
-        bool visualizeResults = true;
+        DetectorType detectorType = SIFT_Det;
+
 
         // get keypoints from the required detector
-        detKeypointsModern(keypoints, imgGray, detectorType, visualizeResults);
+        double timeDet = 0.0;
+        detKeypointsModern(keypoints, imgGray, detectorType, timeDet, bVis);
+        NKeypoints.push_back(keypoints.size());
+        detectorTime.push_back(timeDet);
 
         // only keep keypoints on the preceding vehicle
         bool bFocusOnVehicle = true;
@@ -116,15 +123,17 @@ int main(int argc, const char *argv[])
 
         cv::Mat descriptors;
         // DescriptorType descriptorType = BRISK_Dsc; // set the required descriptor
-        DescriptorType descriptorType = ORB_Dsc;
+        // DescriptorType descriptorType = ORB_Dsc;
         // DescriptorType descriptorType = AKAZE_Dsc;
         // DescriptorType descriptorType = FREAK_Dsc;
-        // DescriptorType descriptorType = SIFT_Dsc;
+        DescriptorType descriptorType = SIFT_Dsc;
 
-        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
+        double timeDsc = 0.0;
+        descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType,timeDsc);
 
         // push descriptors for current frame to end of data buffer
         (dataBuffer.end() - 1)->descriptors = descriptors;
+        descriptorTime.push_back(timeDet+timeDsc);
 
         cout << "#3 : EXTRACT DESCRIPTORS done" << endl;
 
@@ -142,13 +151,14 @@ int main(int argc, const char *argv[])
                              (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
                              matches, descriptorType, matcherType, selectorType);
 
+            NMatches.push_back(matches.size());
+
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
 
             cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
             // visualize matches between current and previous image
-            bVis = true;
             if (bVis)
             {
                 cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
@@ -168,6 +178,33 @@ int main(int argc, const char *argv[])
         }
 
     } // eof loop over all images
+
+    float kptsSum = 0.0f;
+    float avgKeypoints = 0.0f;
+    double timeSum = 0.0f;
+    double avgTime = 0.0f;
+    float matchesSum = 0;
+    float avgMatches = 0.0f;
+    float dscTimeSum = 0.0f;
+    float avgDscTime = 0.0f;
+    // calculate average number of keypoints and time for the selected detector
+    for(int i = 0; i < NKeypoints.size(); i++)
+    {
+        kptsSum += NKeypoints[i];
+        timeSum += detectorTime[i];
+        matchesSum += NMatches[i];
+        dscTimeSum += descriptorTime[i];
+    }
+
+    avgKeypoints = kptsSum/NKeypoints.size();
+    avgTime = timeSum/detectorTime.size();
+    avgMatches = matchesSum/NMatches.size();
+    avgDscTime = dscTimeSum/descriptorTime.size();
+
+    cout << "Average number of points = " << avgKeypoints << endl;
+    cout << "Average detector time = " << avgTime << endl;
+    cout << "Average matches = " <<avgMatches << endl;
+    cout << "Keypoint detection and descriptor extraction time = " << avgDscTime << endl;
 
     return 0;
 }

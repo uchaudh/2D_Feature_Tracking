@@ -18,15 +18,15 @@
 
 #include "dataStructures.h"
 
-void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsFast(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsBrisk(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsOrb(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsAkaze(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsSift(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img);
-void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, bool bVis=false);
-void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, DescriptorType descriptorType);
+void detKeypointsShiTomasi(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsFast(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsBrisk(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsOrb(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsAkaze(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsSift(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, double &time);
+void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, DetectorType detectorType, double &time, bool bVis=false);
+void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, DescriptorType descriptorType,double &time);
 void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::KeyPoint> &kPtsRef, cv::Mat &descSource, cv::Mat &descRef,
                       std::vector<cv::DMatch> &matches, std::string descriptorType, std::string matcherType, std::string selectorType);
 

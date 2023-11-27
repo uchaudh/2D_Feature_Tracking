@@ -79,4 +79,10 @@ Then, add *C:\vcpkg\installed\x64-windows\bin* and *C:\vcpkg\installed\x64-windo
 
 ## Observations
 
-* SIFT detector + ORB descriptor do not work together
+* SIFT detector + ORB do not work together and throws a OutOfMemory error.
+
+## Top 3 recommended detector/descriptor combinations
+
+* Harris + ORB
+* FAST + BRISK
+* FAST + ORB

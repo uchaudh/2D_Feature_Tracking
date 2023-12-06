@@ -27,7 +27,7 @@ enum DetectorType
 
 enum DescriptorType
 {
-    BRISK_Dsc,
+    BRIEF_Dsc,
     ORB_Dsc,
     FREAK_Dsc,
     AKAZE_Dsc,

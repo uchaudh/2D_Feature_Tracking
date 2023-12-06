@@ -74,13 +74,13 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints;     // create empty feature list for current image
-        // DetectorType detectorType = HARRIS_Det;   //set the required detector type
+        DetectorType detectorType = HARRIS_Det;   //set the required detector type
         // DetectorType detectorType = SHITOMASI_Det;
         // DetectorType detectorType = FAST_Det;
         // DetectorType detectorType = BRISK_Det;
         // DetectorType detectorType = ORB_Det;
         // DetectorType detectorType = AKAZE_Det;
-        DetectorType detectorType = SIFT_Det;
+        // DetectorType detectorType = SIFT_Det;
 
 
         // get keypoints from the required detector
@@ -122,11 +122,11 @@ int main(int argc, const char *argv[])
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
         cv::Mat descriptors;
-        // DescriptorType descriptorType = BRISK_Dsc; // set the required descriptor
+        DescriptorType descriptorType = BRIEF_Dsc; // set the required descriptor
         // DescriptorType descriptorType = ORB_Dsc;
         // DescriptorType descriptorType = AKAZE_Dsc;
         // DescriptorType descriptorType = FREAK_Dsc;
-        DescriptorType descriptorType = SIFT_Dsc;
+        // DescriptorType descriptorType = SIFT_Dsc;
 
         double timeDsc = 0.0;
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType,timeDsc);
